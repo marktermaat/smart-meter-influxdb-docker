@@ -1,0 +1,13 @@
+version: "3.1"
+
+services:
+  smart-meter:
+    image: pythontest:latest
+    restart: always
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+    environment:
+      - LOG_LEVEL=INFO
+      - INFLUXDB_DATABASE=my_data
+    volumes:
+      - ./log:/var/log
