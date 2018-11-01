@@ -1,8 +1,8 @@
-version: "3.1"
+version: "3.7"
 
 services:
   smart-meter:
-    image: pythontest:latest
+    image: marktermaat/smart-meter-influxdb:latest
     restart: always
     devices:
       - "/dev/ttyUSB0:/dev/ttyUSB0"
