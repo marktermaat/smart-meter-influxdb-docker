@@ -8,7 +8,7 @@ This script connects to a smart meter that follows the DSMR standard. This tool 
 # How to use
 The script is packaged as a Docker container, so it needs Docker to run. You can either use Docker directly:
 
-`docker run -it --rm --device=/dev/ttyUSB0 -e INFLUXDB_DATABASE='my-data' -v ./log:/var/log marktermaat/smart-meter-influxdb:latest python`
+`docker run -it --rm --device=/dev/ttyUSB0 -e INFLUXDB_DATABASE='my-data' -v ./log:/var/log marktermaat/smart-meter-mqtt:latest python`
 
 Or use the example docker-compose file and run:
 
@@ -28,8 +28,10 @@ The following environment variables can be set.
 | INFLUXDB_USER     | The username to connect to the InfluxDB server                         |           |           |
 | INFLUXDB_PASSWORD | The password to connect to the InfluxDB server                         |           |           |
 | INFLUXDB_DATABASE | The database name InfluxDB to send the data to                         |           | Required  |
+| MQTT_HOST         | The hostname of the MQTT server | localhost | |
+| MQTT_PORT         | The port of the MQTT server | 1883 | |
 
 # Development
 
-- `docker build --tag marktermaat/smart-meter-influxdb .`
-- `docker push marktermaat/smart-meter-influxdb`
+- `docker build --tag marktermaat/smart-meter-mqtt .`
+- `docker push marktermaat/smart-meter-mqtt`
