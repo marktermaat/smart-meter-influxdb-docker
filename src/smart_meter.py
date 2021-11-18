@@ -96,12 +96,12 @@ def convert_message_to_data(message):
   data = {}
   for line in message:
    # Time
-   if line.startswith('0-0:1.0.0'):
-     logging.info(f'Line: {line}')
-     t = line[10:22]
-     time_string = f'20{t[0:2]}-{t[2:4]}-{t[4:6]}T{t[6:8]}:{t[8:10]}:{t[10:12]}Z'
-     data['timestamp'] = time_string
-     logging.info(f'Timestamp - {time_string}')
+    if line.startswith('0-0:1.0.0'):
+      logging.info(f'Line: {line}')
+      t = line[10:22]
+      time_string = f'20{t[0:2]}-{t[2:4]}-{t[4:6]}T{t[6:8]}:{t[8:10]}:{t[10:12]}Z'
+      data['timestamp'] = time_string
+      logging.info(f'Timestamp - {time_string}')
 
     # Energy meter low tariff
     if line.startswith('1-0:1.8.1'):
