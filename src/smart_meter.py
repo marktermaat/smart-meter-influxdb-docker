@@ -3,8 +3,9 @@ import sys
 import serial
 import logging
 import json
-from influxdb import InfluxDBClient
 import paho.mqtt.client as mqtt
+from datetime import datetime
+import pytz
 
 # Main method and loop
 def main():
@@ -12,13 +13,11 @@ def main():
   logging.info('Smart meter logging started')
 
   serial_client = open_serial_client()
-  influxdb_client = open_influxdb_client()
   mqtt_client = open_mqtt_client()
 
   while True:
     message = get_next_message(serial_client)
     data = convert_message_to_data(message)
-    # send_data_to_influxdb(influxdb_client, data)
     send_data_to_mqtt(mqtt_client, data)
 
 # Initializes the logger
@@ -49,25 +48,6 @@ def open_serial_client():
     sys.exit(f'Cannot open serial device: {err}')
 
   return ser
-
-# Opens the InfluxDB Client
-def open_influxdb_client():
-  host = os.environ.get('INFLUXDB_HOST') or 'localhost'
-  port = int(os.environ.get('INFLUXDB_PORT') or '8086')
-  user = os.environ.get('INFLUXDB_USER') or ''
-  password = os.environ.get('INFLUXDB_PASSWORD') or ''
-  database = os.environ.get('INFLUXDB_DATABASE')
-
-  if database == None:
-    logging.critical('No database set, use environment variable INFLUXDB_DATABASE to set it.')
-    sys.exit('No database set, use environment variable INFLUXDB_DATABASE to set it.')
-
-  try:
-    client = InfluxDBClient('192.168.2.4', 8086, '', '', 'energy')
-    return client
-  except err:
-    logging.critical(f'Cannot open InfluxDB Client: {err}')
-    sys.exit(f'Cannot open InfluxDB Client: {err}')
 
 # Reads the next message from the serial device
 def get_next_message(ser):
@@ -100,8 +80,12 @@ def convert_message_to_data(message):
       logging.info(f'Line: {line}')
       t = line[10:22]
       time_string = f'20{t[0:2]}-{t[2:4]}-{t[4:6]}T{t[6:8]}:{t[8:10]}:{t[10:12]}Z'
-      data['timestamp'] = time_string
-      logging.info(f'Timestamp - {time_string}')
+      tz = pytz.timezone("Europe/Amsterdam")
+      naive = datetime.strptime(time_string, '%Y-%m-%dT%H:%M:%SZ')
+      local_timestamp = tz.localize(naive)
+      utc_timestamp = local_timestamp.astimezone(pytz.utc).isoformat()
+      data['timestamp'] = utc_timestamp
+      logging.info(f'Timestamp - {utc_timestamp}')
 
     # Energy meter low tariff
     if line.startswith('1-0:1.8.1'):
@@ -162,18 +146,6 @@ def convert_message_to_data(message):
   data['meter_total_tariff'] = data['meter_low_tariff'] + data['meter_normal_tariff']
   data['meter_supplied_total_tariff'] = data['meter_supplied_low_tariff'] + data['meter_supplied_normal_tariff']
   return data
-
-# Sends the data to InfluxDB
-def send_data_to_influxdb(client, data):
-  influx_data = [
-    {
-      "measurement": "smart_meter",
-      "time": data['timestamp'],
-      "fields": data
-    }
-  ]
-  client.write_points(influx_data)
-  logging.info('Data send to InfluxDB')
 
 def open_mqtt_client():
   host = os.environ.get('MQTT_HOST') or 'localhost'
