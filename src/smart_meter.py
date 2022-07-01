@@ -143,6 +143,30 @@ def convert_message_to_data(message):
       data['current_gas_usage'] = usage
       logging.info(f'Current usage - gas: {usage}')
 
+    # Current voltage phase 1 (L1)
+    if line.startswith('1-0:32.7.0'):
+      logging.info(f'Line: {line}')
+      usage_str = line[11:16]
+      usage = float(usage_str)
+      data['voltage_l1'] = usage
+      logging.info(f'Current voltage - phase 1: {usage}')
+
+    # Current voltage phase 2 (L2)
+    if line.startswith('1-0:52.7.0'):
+      logging.info(f'Line: {line}')
+      usage_str = line[11:16]
+      usage = float(usage_str)
+      data['voltage_l2'] = usage
+      logging.info(f'Current voltage - phase 2 {usage}')
+
+    # Current voltage phase 3 (L3)
+    if line.startswith('1-0:72.7.0'):
+      logging.info(f'Line: {line}')
+      usage_str = line[11:16]
+      usage = float(usage_str)
+      data['voltage_l3'] = usage
+      logging.info(f'Current voltage - phase 3: {usage}')
+
   data['meter_total_tariff'] = data['meter_low_tariff'] + data['meter_normal_tariff']
   data['meter_supplied_total_tariff'] = data['meter_supplied_low_tariff'] + data['meter_supplied_normal_tariff']
   return data
